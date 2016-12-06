@@ -1,0 +1,21 @@
+[CO 487 - S25 - Elliptic Curve]
+why does line through P and Q touch point -(P+Q)
+same with P and -(P+P)?
+P+Q is on E, but P and Q individually or not? aren't p and q points?
+
+[point addition formulae]
+xp+q?
+yp+q?
+
+
+[Elliptic Curve Diffie-Hellman]
+**points being added repeatedly - e.g. xP means point P added x times
+pick a curve E and an element p
+pick x in Z at random
+send xP in E to bob
+bob picks y in Z at random
+bob sends yp in E to alice
+
+alice and bob can compute xyP = x(yP) = y(xP) in E
+
+**

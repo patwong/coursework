@@ -1,0 +1,50 @@
+[CO487 - S30 - Quantum Key distribution]
+uncertainty principle: no way to determine a quantum state without measuring it
+quantum superposition: prior to measurement, all possible states of an object exist simultaneously (schroedinger's cat)
+quantum entanglement: in an entangled pair, measuring one object constrains the possible states for the other object
+	(unmeasured object's state must be consistent with the first object's measurement)
+.
+[quantum key distribution]
+QKD achieves unbreakable symmetric-key encryption using quantum mechanics to simulate a one0-time pad
+- QKD requires the ability to transmit quantum states
+- an acual one-time pad is not required
+- no secret information needs be transferred
+- any eavesdropping can be detected - because eavesdropping = measurement
+
+[BB84]
+polarized light
+
+**
+sending/measuring basis: horizontal, vertical, diagonal filters
+- goes through horizontal, vertical, or diagonal
+	e.g. if horizontal filter: all horizontal light goes through, half diagonal, no vertical
+result: shared public key
+
+A: 4 choices of photon polarization - send one photon at a time
+B: doesn't know polarization of photon
+- there are four choices, filter can only be in one position
+
+
+[security of BB84]
+- eavesdropping of photons will alter polarization, which detectable
+- the most conservative strategy is to shut down communications if eavesdropping detected
+	- maximizes security, availability
+- alternatively, if only some bits intercepted, can apply techniques of information reconciliation and privacy amplification
+	information reconciliation: use error-correcting codes to fix errors (caused by eavesdropping or otherwise)
+	privacy amplification: hash the shared key to eliminate any partial knowledge of the key that an adversary may have (universal hash function)
+
+[QKD in practice]
+QKD exists, implemented and practical
+
+
+
+
+
+
+
+
+
+
+
+
+

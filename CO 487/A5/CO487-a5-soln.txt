@@ -1,0 +1,131 @@
+[CO 487 A5]
+[Q1]
+E(m) = (E_p(k_pub,k),E_s(k,m)) = (c1, c2)
+D(c) = D(D(k_priv,c1),c2)
+
+not secure under adaptive chosen-ciphertext attack (CCA2)
+E(k,m): symmetric-key encryption scheme
+
+insecurity goals:
+1. total break
+2. decrypt ctext
+3. learn partial info about msg
+------------------
+attacker knows: k_public, encrypted msg length
+
+steps:
+k_pub, k, m
+1. c1 = E_p(k_pub,k)
+2. c2x` = E(k,m) = k XOR m
+3. send (c1,c2)
+
+dec
+1. receive (c1,c2)
+2. k = D_p(k_priv,c1)
+3. m = D(k,c2) = E(k,c2) = k XOR c2
+
+CCA2: iteratively choose ctext, get ptext
+
+---------------
+A: with CCA2 attack, can determine the key used to encrypt for every c2, e.g. the key used in the OTP.
+=> c2 XOR m = k
+=> we learn that the basic hybrid scheme uses OTP to create c2
+=> IND-CCA2 fails, i.e. not semantically secure under an adaptive chosen-ciphertext attack
+Q:
+=> can't we say this for other hybrid schemes under CCA2 attacks?
+
+(hash key k)
+(c1,c2) = (E_p(k_pub,k), E(H(k),m))
+m = D(H(D_p(k_pub, c1)),c2)
+
+enc
+1. c1 = encrypt k under PKC
+2. hash k
+3. c2 = encrypt m in SKC with H(k)
+4. output (c1,c2)
+
+dec
+1. receive c1,c2
+2. k = decrypt c1 under PKC
+3. hash k
+4. m = decrypt c2 under SKC with hash(k)
+
+CCA2: given (c1, c2)_i, acquire m_i
+=> cannot determine the actual k since k is hidden with a hash
+=> depending on SKC, might be able to determine that it's using a hash?
+=> not partial info
+=> what we are sending is an encrypted key and an encrypted message
+=> in hash, we have found the actual msg (obv) but not anything else 
+
+Q: am i missing something? is there something else?
+________________________________________________________________________________________
+[Q2]
+if K is done wrong (e.g. value from Finite Field rather than Zq*, then just do other)
+double-and-add: -1, not +1 like in TA example
+- create a stack of ops, i.e. in a list
+
+
+want: K, alpha
+- need K to get alpha
+Q: difference between N and F?
+- how to rearrange equation for alpha?
+- is G the P as in the slides? i.e. a generator?
+- just multiply P*alpha to confirm?
+- N(s) and N(r)?
+
+SETUP:
+prime p: p
+prime q: ?
+generator P: G
+elliptic curve E over Zp: E
+|E| = q: ?
+hash function: don't need
+
+keygen:
+private: alpha - don't have
+public: public_key
+
+signing:
+r: r
+s: s
+
+
+steps left:
+get alpha
+with lapha, calculate H(m)/s * P + r/s * (alpha*P) cong r mod q ===> look at sample code
+compute our own alpha*P
+for loop through all our alphas (determined from k) to see if the r == r equation holds
+	if true, break. correct k is found
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

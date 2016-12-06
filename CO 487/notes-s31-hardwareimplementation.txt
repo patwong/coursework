@@ -1,0 +1,52 @@
+[CO 487 - S31 - Hardware Implementation]
+[Finite Fields]
+field: number system supporting four basic arithmetic operations (+, -, *, /), satisfying usual arithmetic properties
+examples of infinite fields:
+- Q (rational numbers), R (real numbers), C (complex nubmers)
+cryptography: arithmetic in finite fields
+
+for any prime power q = p^m let GF(q) denote the finite field of size q
+special cases:
+	m = 1: prime field
+	p = 2: binary field
+
+[binary fields]
+GF(4) = ... = {0, 1, a, b}
+treat a as some constant, b as 1+a. let a = x, b = x + 1
+so 1+a = b, b + 1 = a + 2 = a, since 2 mod 2 = 0 
+
+multiplication: a*a = a^2 = x^2
+=> x^2 + x + 1 = 0, since it is 0 mod (that polynomial)
+then
+	x^2 = -(x+1)
+	x^2 = x + 1 (negatives ignored in mod)
+	x^2 = b
+	a^2 = b QED
+
+[Arithmetic in binary fields]
+two standard methods for implementing arithmetic
+1. polynomial basis
+2. normal basis
+basis: GF(2) subset of GF(2^m), and GF(2^m) is a vector space over GF(2) of dimension m
+
+[polynomial basis]
+GF(2^m) set of polynomials over GF(2) of degree < m
+GF(2^m) = GF(2)[t]/(p(t))
+	= {...}
+{1,t,t^2,t^m-1} is a basis for GF(2^m) over GF(2)
+addition is just polynomial addition (collecting like terms, adding coefficients (mod 2))
+
+[Normal Basis]
+normal basis = {B, B^2, B^(2^2),...,B^2^m-1}
+addition is same (bitwise XOR, combine coefs)
+
+[normal basis multiplication]
+a*b = z 
+
+multiplication with matrix
+
+
+
+
+
+

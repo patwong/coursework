@@ -1,0 +1,29 @@
+[CO 487 - S21 - Security Definitions for public-key encryption]
+randomized algorithm G: {1^l: l in N} -> Kpub x Kpriv
+- what is it?
+
+security of RSA
+- if RSA is totally insecure, then integer factorization is easy
+	- how?
+____________________________________________________________________
+[defn of pkc]
+pkc consists of
+- M: message space
+- C: ciphertext space
+- Kpub: space of public keys
+- Kpriv: space of private keys
+- G: {1^l: l in N} -> Kpriv x Kpub : a randomized algorithm - key-generation function
+- encryption algorithm E: kpub x M -> c
+- decryption algorithm D: kpriv x M -> M
+
+correctness requirement
+- given key pair produced by G, D(kpriv,E(kpub,m)) = m, for all m in M
+
+[framework for security defns]
+security depends on three questions
+1. how does adversary interact with communicating parties?
+2. what is computational power of adversary?
+3. adversary's goal?
+
+basic assumption: adversary knows everything about algorithm except secret key k
+

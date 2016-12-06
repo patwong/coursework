@@ -1,0 +1,148 @@
+[CO 487 - S26 - Digital Signatures]
+[motivation for digital signatures]
+defn of PKC: decryption must be left inverse of encryption
+=> D(kpriv, E(kpub,m)) = m
+
+no corresponding requirement that decryption be a right inverse of encryption
+E(kpub, D(kpriv,c)) = c
+
+some cases decryption is right inverse of encryption (plain RSA w/o padding)
+some cases decryption is not right inverse of encryption (Elgamal)
+
+when decryption is a right inverse of encryption: can have digital signatures
+
+[rsa signature scheme]
+key generation like rsa
+
+signature: given m
+- compute s = m^d mod n
+- s: signature
+
+signature verification:
+- get public key (n,e)
+- if s^e mod n = m, signature true
+
+[defn of digital signatures]
+signing algorithm
+verificaton algorithm
+V(kpub,message,S(kpriv,m))
+
+[security requirements]
+designer goals:
+authenticate origin of message
+guarantee integrity of msg
+
+security reqs
+- infeasible to deduce the private key from the public key
+- should be infeasible to generate valid signatures
+
+[goals of adversary]
+1. total break
+- recover private key, or a method for systematically forging signatures (i.e. compute signature for arbitrary messages)
+2. selective forgery
+- given message or a subset of messages, forge a signature for those messages
+3. existential forgery
+- choose a message and forge a signature for that message
+
+[attack model]
+- key-only attack : public key known
+- known message attack: some messages and their valid signatures are known
+- chosen-message attack: can choose some messages and obtain their signatures
+
+[security defn]
+defn: signature scheme is said to be secure if it is existentially unforgeable by a computationally bounded adversary who launches a chosen-message attack (EUF-CMA)
+
+in defn:
+- adversary given public key
+- has access to a signing oracle, which given a message produces a valid signature for that message under above public key
+- goal is to compute a valid signature for some message m which has not been provided as input to the signing oracle
+
+[security of basic rsa signature scheme]
+theorem: necessary condition for RSA signatures to be secure is that hte RSA problem must be intractable
+
+pf: if RSA problem easy, can forge signatures like this:
+1. let m be any message
+2. find s s.t. s^e = m (mod n)
+3. then s is valid signature for m
+
+[existential forgery against RSA]
+even if RSA problem intractable, basic RSA still insecure
+existential forgery under a key-only attack
+-> create signature s.t. gcd(s,n) = 1
+compute s^e mod n
+=> then m = s^e mod n, s is valid signature for m
+
+selective forgery under chosen msg attack:
+given message m
+- m' = 2^e * m mod n
+- s' = signature(m')
+- s = (s'/2) mod n
+- s is valid signature for m
+
+s = m^d mod n
+s' = 2^ed * m^d mod n / 2
+	= 2 * m^d mod n / 2
+	= m^d mod n
+**see existential forgery example in notes
+
+[Full Domain Hash RSA]
+hash the message before signing it (i.e. h = H(m), s = h^d mod n)
+
+[Security of RSA-FDH]
+if RSA problem is intractable and H is a random function, then RSA-FDH is secure signature scheme
+
+theorem: doesn't hold if H isn't random function
+- insecure hash function: PKCS #1 v1.5	
+
+[digital signature algorithm (DSA)]
+based on DH/ElGamal
+
+setup
+- prime p, prime q dividing p - 1, g in Z*_p of order q (g^q cong 1 mod p), hash function
+
+key generation:
+- alpha in Z*_q
+key: (kpub, kpriv) = (g^alpha mod p, alpha)
+
+signing: given message m
+- choose random k in Z*_q
+- calculate r = (g^k mod p) mod q, s = ((H(m) + alpha*r)/k) mod q
+- repeat if k, r, s are zero
+signature: sigma = (r, s)
+
+verification: given g^alpha, m, (r,s)
+- ensure r, s in [0, q]
+- ensure (g^H(m)/s * g^alpha*r/s mod p) mod q = r
+
+
+[__QUESTIONS__]
+[existential forgery against rsa]
+how is s = s'/2 mod n a valid signature?
+how is r = (g^h(m)/g * g^(alpha r /g) mod p)mod q?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

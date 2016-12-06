@@ -1,0 +1,4 @@
+in the list "lol", one list requires only 2 more bits
+- but i have not generated a list of bin2?
+how is it all length 256?
+????????

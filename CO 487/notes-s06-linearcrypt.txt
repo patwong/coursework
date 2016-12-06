@@ -1,0 +1,2 @@
+[CO 487 - S06 - Linear Cryptanalysis]
+DES component function is a substitution-permutation network (SPN)

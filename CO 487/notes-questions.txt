@@ -1,0 +1,134 @@
+[CO 487 - questions]
+[_____slides03 0 security defns for SKE_____]
+to break a symmetric-key encryption scheme...
+- adversary given challenge ciphertext
+- adversary can select plaintext and obtains corresponding ciphertext
+	- is this ctext the same as aforementioned ctext or different?
+
+
+[_____slides04_____]
+double DES: is the 2^57 from calculating k1, k2? i.e. 2*2^56
+- we ignore the n possible (mi, ci) pairs? i.e. n*2^57 ops
+
+h2: the key? so we guess a bunch of keys, or with each known ptext pairs we have their key?
+- think we guess a h2, calculate its inverse, then find LHS s.t. LHS = RHS
+- where does the extra 2^1 come from to make it 2^57?
+
+triple DES: 112 steps - why? exercise
+
+[_____slides05_____]
+s8 linear cryptanalysis: why is U4 dependent on C and K5?
+
+
+
+[_____slides06_____]
+s26: what was the point of expanding out the relationship and then combining them?
+
+
+[_____slides07_____]
+s13: how does our guess of K help us compute delta U?
+heys article p26: how do we get the difference pairs? did we just pick the ones with the highest bias?
+A: https://plus.google.com/113065490098700373101/posts/Y3tCSiMbCrV
+
+how to guess keys?
+
+what's high probability?
+
+[_____slides10_____]
+why is repeated use of IV in CBC,CFB invalidate semantic security? (look at block cipher notes for defn on semantic security, or slides 3)
+
+djao - CBC "How does IV reuse break semantic security in the CBC mode of operation?"
+"If you use the same IV every time then an adversary in possession of the ciphertexts can tell whether or not two ciphertexts encrypt identical plaintexts, since the plaintexts are identical if and only if the ciphertexts are identical. This information constitutes partial information about the plaintexts, violating semantic security."
+
+
+[why is OFB like a stream cipher?]
+djao: "It operates one bit at a time on the plaintext, so in that sense it acts like a stream cipher."
+stream cipher: SKE in which each successive char of ptext determines a single char of ctext
+
+ptext + key are not both sent to the encryption unit, only the keys
+- text never sent to encryption unit
+
+
+[_____slides 11_____]
+why is it sqrt(2^l) = 2^(l/2) operations
+
+
+[_____slides 13 - collisions in iterated hash functions_____]
+differential delta M and differential delta H(m) = 0 with high probability
+- what does it mean for it to have high probability?
+
+[_____slides 19 - rsa_____]
+why isn't 10 = 3 mod 7 valid? => 10 doesn't exist in Z_7
+why isn't 1 = 2 mod 1 valid?
+Why is 4 = -10 mod -7? Isn't 4 not in In Z_(-7), i.e. {-7, -6, -5,....,0}?
+
+modular division? => look at notes
+modular exponentiation
+- for 2^2^9, determining mod is easy? these are large numbers? how is this calculated for large m,e?
+- how was the 775 determined? multiplying 478....2?
+modular arithmetic
+- looking at example online, 1 - 2mod7 = -1mod7???
+RSA proof
+- why allowed to swap (m^p-1) with 1?
+
+
+[_____slides 20 - diffie hellman_____]
+Zp (mod f(x))
+Q: in DH key exchange, alice must send both g^a and p for it to work, otherwise bob can't pick a b - correct?
+
+[_____slides 21 - security defn_____]
+s2: randomized algorithm - what is 1^l?
+
+[_____slides 23_____]
+semantic insecurity: l-th residuosity attack - explain pls
+- what is z? assuming x,y correspond to x and r in elgamal
+
+
+[_____slides 25 - elliptic curve_____]
+why does line through P and Q touch point -(P+Q)
+same with P and -(P+P)?
+P+Q is on E, but P and Q individually or not? aren't p and q points?
+double-and-add wrt to elliptic curve: how is this computing m, x_p+q, y_p+q?
+
+
+[_____slides 26 - digital signatures_____]
+[existential forgery against rsa]
+how is s = s'/2 mod n a valid signature?
+how is r = (g^h(m)/g * g^(alpha r /g) mod p)mod q?
+
+[_____slides 28 - bitcoins_____]
+questions in file
+Q: the whole transaction is input to a hash?
+- the hash is what to previous owner's signature?
+- please clarify
+
+Q: proof of work
+- where is it in the block?
+- proof of work for both transaction and mining?
+- so every time do transaction, "mine" for a hash?
+
+
+[S30 - Quantum Key Distribution]
+S5: in notes, say four choices of photon polarization - but we only have 3 different polarizations? (horizontal, vertical, diagonal)
+
+[S31 - hardware implementation]
+polynomial+normal basis squaring
+- squaring the coefficient leads to only the original coefficient? e.g. a^2 = 
+=> solved in notes
+
+what is the matrix in normal basis?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

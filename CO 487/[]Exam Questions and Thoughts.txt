@@ -1,0 +1,36 @@
+[CO 487 - exam study - questions + thoughts]
+[S10 - block modes of encryption]
+CFB reusing IV - different than CBC?
+OFB: reusing IV under same key invalidates semantic security
+- can totally break
+- e.g. c1 XOR p1 = k1
+- under OFB with same IV and key, c2 XOR p2 = k1
+
+[S14 - MACs]
+no non-repudiation or confidentiality in MACs
+- why? because shared secret. anyone who has shared secret can compute MAC
+- 
+
+[S16 - Applied Cryptanalysis]
+poodle attack - ????
+
+[S25 - elliptic curve]
+questions in the file
+
+
+[S30 - Quantum Key Distribution]
+S5: in notes, say four choices of photon polarization - but we only have 3 different polarizations? (horizontal, vertical, diagonal)
+
+[S31 - hardware implementation]
+polynomial+normal basis squaring
+- squaring the coefficient leads to only the original coefficient? e.g. a^2 = 
+=> solved in notes
+
+what is the matrix in normal basis?
+
+
+[______DO/REDO______]
+word problems in assignments
+linear/diff crypt in assn
+review all defns
+do all midterm questions
