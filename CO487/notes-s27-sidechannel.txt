@@ -1,0 +1,56 @@
+[CO 487 - S27 - Side-channel attacks]
+[overview]
+defn: attack that involves observing and/or manipulating intermediate results in a cryptographic calculation
+
+how does one observe internal state information?
+- timing info: how long computation takes
+- power consumption: monitor amount of power used
+- electromagnetic radiation: monitor noise leaked by hardware circuit
+- acoustic information: record sound with microphone
+- other: cache-miss rate, in-circuit emulators
+
+how to manipulate internal state info?
+- fault injection
+- row hammer
+
+row hammer: bombard memory with many changes
+- ram stressed, errors => adjacent rows affected
+- since memory close together, one error affects adjacent rows
+- fix: bigger, slower memory
+
+[type of attacks]
+passive attacks: manipulate inputs, observe intermediate results
+active attacks: manipulate inputs and intermediate results
+fault attacks: set input values and/or intermediate result values to invalid values
+physical attacks: many things e.g. acid bat
+
+[power analysis]
+e.g. smart card RSA private key
+- measure amount of time to perform a signature
+- measure amount of power consumed during signature process as a function of time
+
+[square and multiply]
+suppose squaring mod n consumes different resources than (non-squaring) multiplication mod n
+- by measuring resource consumption, can determine individual bits in d
+- similar attack works in double-and-add
+	- i.e. doubling different than add
+
+[countermeasures]
+basic idea: make all calculations consume constant resources independent of input data, e.g.
+- unified formulas: identical formulas for addition and doubling
+- dummy operations: insert extra useless operations to make calculation uniform (discard result)
+- double and always add: perform same ops independent of data values
+
+[unified ex - edwards curves]
+addition is almost same between two, x with addition, subtraction on numerator/denominator, swapped for y
+
+
+
+
+
+
+
+
+
+
+

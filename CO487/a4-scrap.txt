@@ -1,0 +1,16 @@
+polynomial addition in gf(2)
+- coefficients either 1 or 0 (eg odd or even), no carry over to next term
+ 01010011
+ 11001010
+ 10011001
+100011101
+	
+ 10011001	
+
+toy
+
+
+a: ke1, kd1, ke2
+b: ke2, kd2, ke1
+
+a->b

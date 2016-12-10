@@ -1,0 +1,4 @@
+https://www.youtube.com/watch?v=TZ2AHClLdBY
+
+https://sergworks.wordpress.com/2014/02/01/definitions-of-semantic-security/
+http://crypto.stackexchange.com/questions/2576/encryption-with-constant-initialization-vector-considered-harmful
