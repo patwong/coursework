@@ -5,9 +5,9 @@
 \contentsline {subsection}{\numberline {1.3.1}Linear transformation, linear independence, nullspace, rank}{4}
 \contentsline {subsection}{\numberline {1.3.2}determinant}{4}
 \contentsline {subsection}{\numberline {1.3.3}Eigenvalues and Eigenvectors}{5}
-\contentsline {subsection}{\numberline {1.3.4}Orthogonality}{5}
-\contentsline {subsection}{\numberline {1.3.5}Spectral theorem for real symmetric matrices}{5}
-\contentsline {section}{\numberline {1.4}Applications of the spectral theorem}{5}
-\contentsline {subsection}{\numberline {1.4.1}Power of matrices}{5}
-\contentsline {chapter}{Lecture 2: Graph Spectrum}{6}
-\contentsline {section}{\numberline {2.1}Adjacency Matrix}{6}
+\contentsline {subsection}{\numberline {1.3.4}Orthogonality}{6}
+\contentsline {subsection}{\numberline {1.3.5}Spectral theorem for real symmetric matrices}{6}
+\contentsline {section}{\numberline {1.4}Applications of the spectral theorem}{6}
+\contentsline {subsection}{\numberline {1.4.1}Power of matrices}{6}
+\contentsline {chapter}{Lecture 2: Graph Spectrum}{7}
+\contentsline {section}{\numberline {2.1}Adjacency Matrix}{7}

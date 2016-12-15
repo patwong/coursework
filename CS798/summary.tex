@@ -188,9 +188,17 @@ a_{21}-\lambda & a_{22}-\lambda & \cdots & a_{2n} \\
 a_{n1}-\lambda & a_{n2} & \cdots & a_{nn}-\lambda
 \end{pmatrix}
 \end{align*}
-
+By the (expansion) definition of the determinant, $det(A-\lambda I)$ is a polynomial of $\lambda$ of degree $n$.
+\newline This is called the \underline{characteristic polynomial} of $A$.
+\newline In the last offering of this course, the characteristic polynomials did not play a major role, but they will be very important in the last part of this offering as they will be the key object in the interlacing method. Also, determinants will play an important role in the last part.
+\newline\newline One can compute the characteristic polynomial by Gaussian elimination or interpolation.
+\newline Any root of this polynomial is an eigenvalue, and any vector in $nullspace(A-\lambda I)$ is an eigenvector.
+\newline Geometrically, an eigenvector is a direction that is "fixed" (but can be scaled) by the linear transformation.
+\newline So not all matrices have an eigenvector with a real eigenvalue, e.g. the rotation matrix has no direction fixed, and thus no eigenvector with a real eigenvalue.
+\newline But we will see that all real symmetric matrices have real eigenvalues, a corollary of the spectral theorem that we will prove.
 
 \subsection{Orthogonality}
+To state the spectral theorem, we need one more concept.
 \subsection{Spectral theorem for real symmetric matrices}
 \section{Applications of the spectral theorem}
 \subsection{Power of matrices}
