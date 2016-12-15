@@ -1,0 +1,204 @@
+% <- percent signs are used to comment
+%\documentclass[12pt]{article}
+\documentclass[11pt,a4paper]{report}
+%amsmath is a packaged use for typesetting math
+%amsfonts is required for special fonts, e.g. blackboard bold (for denoting real numbers, etc.)
+\usepackage{amsmath,amsfonts}
+
+%graphicx is required for images
+\usepackage{graphicx}
+
+%used for customzing enumarations
+\usepackage{enumerate}
+
+\usepackage[top=0.5in]{geometry}
+\usepackage{amssymb,epsfig,color,xspace}
+
+\usepackage{amsthm}
+\newcommand\tab[1][1cm]{\hspace*{#1}}
+%\renewcommand{\thesubsection}{Problem \arabic{subsection}}
+
+%Note: Many of the packages above have other uses beyond those used in this document
+\usepackage{scrextend}
+%this marks the beginning of the document. Everything before this is called the Preamble.
+
+%for dashed list
+%source: http://tex.stackexchange.com/questions/62496/itemize-with-a-dash-intstead-of-a-bullet
+\def\labelitemi{--}
+
+%source on removing chapter numbering w/o affecting ToC
+%http://tex.stackexchange.com/questions/110840/how-to-remove-chapter-numbering-without-removing-it-from-tableofcontents
+\newcommand{\mychapter}[2]{
+	\setcounter{chapter}{#1}
+	\setcounter{section}{0}
+	\chapter*{#2}
+	\addcontentsline{toc}{chapter}{#2}
+}
+
+%to add variables to newenvironment
+%[1] is argument, [default] is default arg
+%http://tex.stackexchange.com/questions/968/passing-options-to-the-newenvironment
+%itemize on same line
+%http://tex.stackexchange.com/questions/147710/how-to-start-itemize-on-same-line-as-text
+\newenvironment{courseeval}[1][default]
+	{#1 \begin{minipage}[t]{\linewidth}\begin{itemize}}
+	{\end{itemize}\end{minipage}}
+
+\begin{document}
+	
+\title{CS 798: Algorithmic Spectral Graph Theory}
+\date{Fall 2015}
+\author{Lap Chi Lau}
+\maketitle
+
+\renewcommand{\abstractname}{A Brief Forward}
+\begin{abstract}
+	Compiling Professor Lau's handwritten notes on CS798 in LaTeX.
+	\newline\newline - Patrick Wong
+\end{abstract}
+
+\tableofcontents
+
+\mychapter{1}{Lecture 1: Course Introduction}
+I will start with some basic information, and then do an overview of the technical content of the courses, and finally a review of linear algebra for the course.
+
+\section{Course Information}
+Objective: learn how to use eigenvalues and eigenvectors to design algorithms and prove theorems. More generally, we will use linear algebraic and continuous techniques to solve combinatorial problems.
+\newline\newline
+Course page: https://cs.uwaterloo.ca/$\sim$lapchi/cs798
+\newline\newline
+\begin{courseeval}[Course Evaluation:]
+	\setlength\itemsep{0.01em}
+	\item Homework 50\%, 2-3 assignments
+	\item Project 50\%
+\end{courseeval}
+%http://tex.stackexchange.com/questions/50269/itemize-without-bullets
+\newline\newline
+\begin{courseeval}[Project:]
+	%http://tex.stackexchange.com/questions/12373/how-to-change-the-space-between-the-itemize-items-in-latex
+	\setlength\itemsep{0.01em}
+	\item To study one topic in-depth
+	\item Some suggested topics in the project page (also served as further references for the course)
+	\item encourage to choose a topic close to your research interest
+	\item usually survey type, should be related to spectral grpah theory
+\end{courseeval}
+\newline\newline
+\begin{courseeval}[Prerequisites:]
+	\setlength\itemsep{0.01em}
+	\item[] linear algebra, probability, algorithms, discrete mathematics (graphs)
+	\item[] All of them are covered in undergraduate computer science curriculum
+	\item[] Could get a good idea about the background of linear algebra in today's review
+	\item[] Should like math, as there will be lots of proofs and calculations
+	\item[] May be demanding, as definitions and techniques building up (e.g. missing two weeks will be tough)
+	\item[] Pace may be fast. Material may be too much
+\end{courseeval}
+\newline
+\newline
+References: notes will be provided. No textbook.
+\begin{addmargin}[1em]{0em}
+	 You can see the lecture notes in my previous offering in 2012 to get a good idea, but there are new topics and some presentations of old topics will be changed.
+	 \newline
+	 You can also see the notes of similar courses in other universities as linked in the course page. I usually provide more details in the notes than in the lectures.
+\end{addmargin}
+
+\section{Course Overview}
+There are some recent breakthroughs in using ideas and techniques from spectral graph theory to design better algorithms for graph problems (both better in approximation and faster running time), and also prove new theorems. In this course, we aim to study these new techniques and see the new connections.
+\newline
+Spectral graph theory is not a new topic.
+\newline
+About thirty years ago, an important connection was made between the second eigenvalue and graph expansion. This connection made by Cheeger's inequality is useful in different areas:
+\begin{itemize}
+	\renewcommand\labelitemi{--}
+	\item construction of expander graphs, which have various applications in theory and practice
+	\item analysis of mixing time in random walks, with many applications in sampling and counting
+	\item graph partitioning, and the spectral partitioning algorithm is a widely used heuristic in practice
+\end{itemize}
+\noindent We will study these in the beginning of the course.
+\newline\newline Most of the early results in spectral graph theory are about the second eigenvalue.
+\newline In the last few years, researchers have found new connections between higher eigenvalues and graph properties, including the use of the k-th eigenvalue to find a small non-expanding set, to partition the graph into k non-expanding sets, and to do better analysis of the spectral partitioning algorithm and SDP-based approximation algorithms.
+\newline We will discuss some of these, but probably not all details.
+\newline\newline Then, we will study random walks on graphs, and see the classical connection between the second eigenvalue and the mixing time.
+\newline After that, we see some recent results in using random walks to find a small non-expanding set. This problem is closely related to the unique games conjecture, which is about the limits of polynomial time approximation algorithms. Combining ideas from random walks and higher eigenvalues gives the best attempt to go beyond the unique games barrier.
+\newline This is about half the course. We will also talk about constructions of expander graphs and small-set expanders if time permits.
+\newline\newline Through the study of random walks, we will come across the idea of interpreting the graph as an electrical network, which is used to analyze hitting times of random walks.
+\newline This has found surprising applications recently.
+\newline One line of research is to use ideas from convex optimization to compute these electrical flows quickly, and then somehow these could be used to compute electrical flows faster!
+\newline The other direction is to use these concepts for graph sparsification, where the spectral perspective proved to be the right way to look at this combinatorial problem.
+\newline\newline Finally, we study an exciting new technique called the method of interlacing polynomials. This is a new probablistic method showing the existence of good combinatorial objects, but the proofs involve some mathematical concepts like real-stable polynomials. This method is used to make some breakthroughs in constructing expander graphs (Ramanujan graphs) and partitioning into expander graphs (the Kadison-Singer problem).
+\newline We will also discuss an amazing application of these ideas in designing approximation algorithms for the asymmetric traveling salesman problem.
+\newline The ideas developed in graph sparsification (e.g. barrier argument) is also a key component in the last part of the course.
+\newline\newline This overview is still very sketchy. In class, we will elaborate with more precise definition and more details. This is an unusual exception that the lecture has more details than the notes.
+\newline\newline Some important topics that will not be covered include SDP-based approximation algorithms, eigenvalues of random graphs, and applications of the spectral methods in machine learning.
+\newline\newline The topics are theoretically-oriented. I will try to focus on the underlying techniques that are relevant in broader contexts.
+\newline\newline If you are interested in learning more about these topics before the lecture (e.g. previewing the method of interlacing polynomials), the course project page provides further references.
+
+\section{Background on Linear Algebra}
+\subsection{Linear transformation, linear independence, nullspace, rank}
+Let $A\in R^{mxn}$ be a $n\ x \ n$ matrix, and $x\in R^{n}$ be a column vector (we use $x$ to denote a column vector and $x^T$ to denote a row vector).
+\newline One can view $A$ as a matrix or \underline{linear transformation} from n-dimensional vectors to n-dimensional vectors.
+\newline A set of vectors $v_1,v_2,...,v_k$ are \underline{linearly independent} if $c_1 v_1 + c_2 v_2 + ... + c_k v_k = 0$ implies $c_1=c_2=...=c_k=0$; otherwise they are \underline{linearly dependent}.
+\newline The \underline{nullspace} of $A$ (or the kernel of $A$) is defined as $nullspace(A) = \{x\in R^n \ \vert \ Ax=0 \}$
+and its dimension is defined as $null(A)$.
+\newline The \underline{range} of $A$ (or the \underline{image} of $A$) is defined as $range(A) = \{Ax \ \vert \ x\in R^n\}$ and its dimension is defined as the \underline{rank} of A, denoted as $rank(A)$.
+\newline It is known that $rank(A)+null(A)=$ if $A$ is a $n\ x \ n$ matrix.
+\newline It follows from the definition that $rank(A)$ is the number linearly independent columns of $A$.
+\subsection{determinant}
+The determinant of $A$, denoted by $det(A)$, is defined recursively as $$det(A)=\sum_{j=1}^{n}(-1)^{i+j}a_{ij}\cdot  det(\tilde{A}_{ij})$$
+\indent where $a_{ij}$ is the (i, j)-th entry of $A$ and $\tilde{A}$ is the matrix obtained from $A$ by deleting the $i$-th row and $j$-th column.
+\newline We can unfold the recursion and get an equivalent (expansion) definition:
+$$ det(A)=\sum_{\sigma\in S^n}^{} sgn(\sigma) \prod_{i=1}^{n}a_{i,\sigma(i)}$$
+\indent where $\sigma :[n]\rightarrow [n]$ is a permutation (or a bijection) of the indices, and $sgn(\sigma)=+1$ if $\sigma$ is even and $sgn(\sigma)=-1$ if $\sigma$ is odd. More precisely, $sgn(\sigma)=(-1)^{inv(\sigma)}$ where $ inv(\sigma)=\vert \{(i,j) \ \vert \ i < j \ and \ \sigma (i) > \sigma (j) \} \vert $ is the number of inversions of $\sigma$
+\newline\newline A basic property of the determinant is the following:
+\[ det\begin{pmatrix}
+a_1 \\ \vdots \\ a_{r-1} \\ u+kv \\ a_{r+1} \\ \vdots \\ a_n
+\end{pmatrix}
+= 
+det\begin{pmatrix}
+a_1 \\ \vdots \\ a_{r-1} \\ u \\ a_{r+1} \\ \vdots \\ a_n
+\end{pmatrix}
++
+k\cdot det \begin{pmatrix}
+a_1 \\ \vdots \\ a_{r-1} \\ v \\ a_{r+1} \\ \vdots \\ a_n
+\end{pmatrix}
+\] which follows from the expansion definition of the determinant.
+\newline From this it follows that 
+\[
+det\begin{pmatrix}\vdots \\ ca_i \\ \vdots\end{pmatrix}
+= c\cdot det\begin{pmatrix}\vdots \\ a_i \\ \vdots\end{pmatrix}, \ 
+det\begin{pmatrix}v \\ v \\ \vdots\end{pmatrix} = 0, \ 
+det\begin{pmatrix}\vdots \\ a_i \\ \vdots \\ a_j \\ \vdots \end{pmatrix} = 
+-det\begin{pmatrix}\vdots \\ a_j \\ \vdots \\ a_i \\ \vdots \end{pmatrix}, \ 
+det\begin{pmatrix}\vdots \\ a_i + ca_j \\ \vdots \\ a_j \\ \vdots \end{pmatrix} = det\begin{pmatrix}\vdots \\ a_i \\ \vdots \\ a_j \\ \vdots \end{pmatrix}
+\]
+Therefore, we can compute the determinant by reducing $A$ into an upper triangular matrix by elementary row operations, and prove that $det(A)\ne 0$ if and only if $rank(A)=n$ (because $rank(A)=n$ if and only if it can be reduced to an upper triangular matrix where all the diagonal entries are nonzero).
+\newline\newline One can also prove that $det(AB)=det(A)det(B)$, as this is true for elementary matrices and one can write $A$ and $B$ as products of elementary matrices if $rank(A)=rank(B)=n$
+
+\subsection{Eigenvalues and Eigenvectors}
+A nonzero vector $x$ is an \underline{eigenvector} of $A$ if there exists $\lambda$ such that $Ax=\lambda x$, and the scalar $\lambda$ is called an \underline{eigenvalue} of $A$.
+\newline Note that $Ax=\lambda x$ iff $(A-\lambda I)x = 0$ where $I = \begin{pmatrix}1 & & 0 \\ & \ddots & \\ 0 & & 1 \end{pmatrix}$ is the identity matrix.
+\newline There is a nonzero vector x satisfying $(A-\lambda I)x = 0$
+\begin{align*}
+&\iff nullspace(A-\lambda I)\ne \{0\} \\
+& \iff rank(A-\lambda I) < n \\
+& \iff det(A-\lambda I)=0, 
+i.e. \ det\begin{pmatrix}
+a_{11}-\lambda & a_{12} & \cdots & a_{1n} \\
+a_{21}-\lambda & a_{22}-\lambda & \cdots & a_{2n} \\
+\vdots & \vdots & \ddots & \vdots \\
+a_{n1}-\lambda & a_{n2} & \cdots & a_{nn}-\lambda
+\end{pmatrix}
+\end{align*}
+
+
+\subsection{Orthogonality}
+\subsection{Spectral theorem for real symmetric matrices}
+\section{Applications of the spectral theorem}
+\subsection{Power of matrices}
+
+\mychapter{2}{Lecture 2: Graph Spectrum}
+forward
+
+\section{Adjacency Matrix}
+this
+
+\end{document}
