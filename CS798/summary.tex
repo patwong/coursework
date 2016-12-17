@@ -22,6 +22,53 @@
 \usepackage{scrextend}
 %this marks the beginning of the document. Everything before this is called the Preamble.
 
+
+%%unnumbered theorem
+%source on using newtheoremstyle;
+%http://tex.stackexchange.com/questions/12913/customizing-theorem-name
+%http://tex.stackexchange.com/questions/234676/new-theorem-style
+%a lot more helpful than wikibooks!
+\newtheoremstyle{theoremdd}% name of the style to be used
+{\topsep}% measure of space to leave above the theorem. E.g.: 3pt
+{\topsep}% measure of space to leave below the theorem. E.g.: 3pt
+{\itshape}% name of font to use in the body of the theorem
+{0pt}% measure of space to indent
+{\bfseries}% name of head font
+{ ---}% punctuation between head and body
+{ }% space after theorem head; " " = normal interword space
+{\thmnote{#3}}
+
+\theoremstyle{theoremdd}
+\newtheorem{thmd}{Theorem}[section]
+
+%underlined "theorem" for prof lau's claims (sub of theorem)
+\newtheoremstyle{claims1}% name of the style to be used
+{\topsep}% measure of space to leave above the theorem. E.g.: 3pt
+{\topsep}% measure of space to leave below the theorem. E.g.: 3pt
+{}% name of font to use in the body of the theorem
+{0pt}% measure of space to indent
+{\underline}% name of head font
+{ }% punctuation between head and body
+{.5em}% space after theorem head; " " = normal interword space
+{\thmnote{#3}}
+
+\theoremstyle{claims1}
+\newtheorem{claimsyay}{Theorem}[section]
+
+%
+\newtheoremstyle{proofs1}% name of the style to be used
+{\topsep}% measure of space to leave above the theorem. E.g.: 3pt
+{\topsep}% measure of space to leave below the theorem. E.g.: 3pt
+{}% name of font to use in the body of the theorem
+{0pt}% measure of space to indent
+{}% name of head font
+{ }% punctuation between head and body
+{.5em}% space after theorem head; " " = normal interword space
+{\thmnote{#3}}
+
+\theoremstyle{proofs1}
+\newtheorem{proofwrite}{Proof}[section]
+
 %for dashed list
 %source: http://tex.stackexchange.com/questions/62496/itemize-with-a-dash-intstead-of-a-bullet
 \def\labelitemi{--}
@@ -43,6 +90,8 @@
 \newenvironment{courseeval}[1][default]
 	{#1 \begin{minipage}[t]{\linewidth}\begin{itemize}}
 	{\end{itemize}\end{minipage}}
+
+
 
 \begin{document}
 	
@@ -142,7 +191,7 @@ and its dimension is defined as $null(A)$.
 \newline The \underline{range} of $A$ (or the \underline{image} of $A$) is defined as $range(A) = \{Ax \ \vert \ x\in R^n\}$ and its dimension is defined as the \underline{rank} of A, denoted as $rank(A)$.
 \newline It is known that $rank(A)+null(A)=$ if $A$ is a $n\ x \ n$ matrix.
 \newline It follows from the definition that $rank(A)$ is the number linearly independent columns of $A$.
-\subsection{determinant}
+\subsection{Determinant}
 The determinant of $A$, denoted by $det(A)$, is defined recursively as $$det(A)=\sum_{j=1}^{n}(-1)^{i+j}a_{ij}\cdot  det(\tilde{A}_{ij})$$
 \indent where $a_{ij}$ is the (i, j)-th entry of $A$ and $\tilde{A}$ is the matrix obtained from $A$ by deleting the $i$-th row and $j$-th column.
 \newline We can unfold the recursion and get an equivalent (expansion) definition:
@@ -199,7 +248,38 @@ By the (expansion) definition of the determinant, $det(A-\lambda I)$ is a polyno
 
 \subsection{Orthogonality}
 To state the spectral theorem, we need one more concept.
+\newline Given to n-dimensional vectors 
+$u=\begin{pmatrix} u_1 \\ \vdots \\ u_n \end{pmatrix}$ and 
+$v=\begin{pmatrix} v_1 \\ \vdots \\ v_n \end{pmatrix}$, the \underline{inner product} of $u$ and $v$ is defined as $\langle u,v\rangle = \sum_{i=1}^{n}u_i v_i$, and we define the \underline{norm} (or length) of $u$ as $\| u \| = \sqrt{\langle u,u \rangle}$.
+\newline Two vectors $u$ and $v$ are \underline{orthogonal} (or perpendicular) if $\langle u,v\rangle = 0$ 
+\newline A set $S$ of vectors is orthogonal if $u,v$ are orthogonal for any distinct $u,v\in S$.
+\newline A set $S$ of vectors is \underline{orthonormal} if $S$ is orthogonal and $\| u \| = 1$ for every $u\in S$.
+\newline A set $S$ of vectors is a \underline{basis} for a vector space $V$ if $S$ is linearly independent and every vector of $V$ is a linear combination of the vectors in $S$.
+\newline Given any basis, we can construct an orthogonal basis by the Gram-Schmidt orthogonalization process. For example, given two vectors $v_1 , v_2$, we can construct ${v_2}'$ by subtracting the projection of $v_2$ onto $v_1$. **(drawing in handwritten notes)
+\newline Given a basis $S = \{w_1 , w_2 ,\cdots, w_3\}$, define $S' = \{v_1 , v_2 ,\cdots, v_n\}$ where
+\[ v_k = w_k - \sum_{j=1}^{k-1} \frac{\langle w_k , v_j \rangle}{\| v_j\|^2} v_j , \ for \ 2\leq k \leq n
+\]
+Then $S'$ is an orthogonal basis.
+\newline Then $S'' = \{ \frac{v_1}{\|v_1\|}, \cdots , \frac{v_n}{\|v_n\|}\}$ is an orthonormal basis.
+\newline Having an orthonormal basis is easy for computation, e.g. if $A$ is a matrix whose columns form an orthonormal basis, then $A^T A = I$ and hence $A^{-1} = A^T$ where $A^{-1}$ denotes the inverse of $A$.
+
 \subsection{Spectral theorem for real symmetric matrices}
+(follow the the presentation in Godsil and Royle)
+
+\begin{thmd}[Spectral Theorem for real symmetric matrices]
+	Let A be a real symmetric n-x-n matrix. Then there is an orthonormal basis of $\mathbb{R}^n$ consisting of eigenvectors of A, and the corresponding eigenvalues are real numbers.
+\end{thmd}
+\noindent First we prove that there is a real eigenvalue.
+
+\begin{claimsyay}[\underline{Claim 1}]
+	Let A be a real symmetric matrix. \newline\indent\indent If u and v are eigenvectors with different eigenvalues, then u and v are orthogonal.
+\end{claimsyay}
+
+\begin{proofwrite}[\underline{Proof}]
+	Let $Au=\alpha u$ and $Av = \beta v$, where $\alpha \ne \beta$.
+\end{proofwrite}
+
+
 \section{Applications of the spectral theorem}
 \subsection{Power of matrices}
 
