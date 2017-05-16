@@ -1,0 +1,771 @@
+[____________________________[A3Q1.m]____________________________]
+%table 2
+%clean;
+sigma  = 0.4;
+r = 0.02;
+T = 1;
+K = 100;
+S0 = 100;
+dt = T/25;
+N = 25;
+type = 'put';
+method = 'CNR';
+
+S = [0:0.1*K:0.4*K,...
+    0.45*K:0.05*K:0.8*K,...
+    0.82*K:0.02*K:0.9*K,...
+    0.91*K:0.01*K:1.1*K,...
+    1.12*K:0.02*K:1.2*K,...
+    1.25*K:.05*K:1.6*K,...
+    1.7*K:0.1*K:2*K,...
+    2.2*K, 2.4*K, 2.8*K,...
+    3.6*K, 5*K, 7.5*K, 10*K];
+%initializing vectors to store Black-Scholes finite difference method
+%values, difference between option values, and the ratio of the finite
+%difference option values
+bsfd = zeros(5,1);
+fd_diff = zeros(5,1);
+fd_ratio = zeros(5,1);
+vlen = zeros(1,6);
+vlen(1) = 62;
+[call, put] = blsprice(S,K,r,T,sigma);
+for i = 1:5
+    optval = implicitfd(sigma, r, T, K, S0, dt, S, method,type);
+    s_ind = find(S == 100);
+        
+    bsfd(i) = optval(s_ind);
+    if i >= 2
+       fd_diff(i-1) = abs(bsfd(i-1) - bsfd(i));
+       if i >= 3
+           fd_ratio(i-2) = fd_diff(i-2) / fd_diff(i-1);
+       end
+    end
+
+    %calculating the new grid - new nodes of S inserted between nodes
+    gridlen = length(S);
+    new_s = zeros(1,2*gridlen-1);
+    for c = 1:(gridlen-1)
+        new_s(2*c-1) = S(c);
+        new_s(2*c) = (S(c) + S(c+1))/2;
+    end
+    new_s(end) = S(end);
+    %store the original S for later calculations for the grid
+    if i == 5
+        orig_s = S;
+    end
+    S = new_s;
+    dt = dt/2;
+end
+s_50 = find(orig_s == 50);
+s_150 = find(orig_s == 150);
+s_ranged = orig_s(s_50:s_150);
+v_ranged = optval(s_50:s_150);
+
+figure
+plot(s_ranged,v_ranged,'-');
+%title('Put versus Underlying for fully Implicit Method');
+%title('Put versus Underlying for Crank-Nicolson Method');
+title('Put versus Underlying for CN-Rannacher Method');
+ylabel('Put')
+xlabel('Underlying')
+grid on
+
+delta = (v_ranged(2:end)-v_ranged(1:end-1))'./(s_ranged(2:end)-s_ranged(1:end-1));
+figure
+plot(s_ranged(1:end-1),delta,'-');
+%title('Delta of Put versus Underlying for fully Implicit Method')
+%title('Delta of Put versus Underlying for Crank-Nicolson Method')
+title('Delta of Put versus Underlying for CN-Rannacher Method')
+ylabel('Delta')
+xlabel('Underlying')
+grid on
+
+gamma = 2*(delta(2:end) - delta(1:end-1))./(s_ranged(3:end) - s_ranged(1:end-2));
+figure
+plot(s_ranged(3:end),gamma,'-');
+%title('Gamma of Put versus Underlying for fully Implicit Method')
+%title('Gamma of Put versus Underlying for Crank-Nicolson Method')
+title('Gamma of Put versus Underlying for CN-Rannacher Method')
+ylabel('Gamma')
+xlabel('Underlying')
+grid on
+
+[____________________________[implicitfd.m]____________________________]
+function [optval] = implicitfd(sigma, r, T, K, S0, dt, S, method,type)
+%black-scholes PDE implicit/CN/CN-Rannacher method
+%method: 'implicit', 'CN', 'CNR'
+%type: 'call','put'
+%nat: 'euro','usa'
+
+steps = T/dt;
+%calculating initial option value
+if strcmp(type,'call')
+    V0 = max(S - K,0).';
+elseif strcmp(type,'put')
+    V0 = max(K - S,0).';
+else
+    error('bad type')
+end
+optval = V0;
+%initializing upstream weighting alpha and beta values
+lenS = length(S);
+a1 = 2;
+a2 = lenS - 1;
+Si = S(a1:a2);
+Si_min1 = S(1:a2-1);
+Si_pls1 = S(a1+1:lenS);
+
+%cw - central weighting, fw - forward weighting, bw - backward weighting
+alpha_cw = (sigma*sigma*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si_pls1 - Si_min1);
+beta_cw = (sigma*sigma*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si_min1);
+
+alpha_fw = (sigma*sigma*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1));
+beta_fw = (sigma*sigma*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si);
+
+alpha_bw = (sigma*sigma*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si - Si_min1);
+beta_bw = (sigma*sigma*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1));
+
+%get non-zero elements from central
+av = alpha_cw >= 0;
+bv = beta_cw >= 0;
+if sum(av) == length(av) && sum(bv) == length(bv)
+    alpha = alpha_cw;
+    beta = beta_cw;
+else
+    %get the non zero elements of alpha and beta (forward weighting)
+    af = alpha_fw >= 0;
+    bf = beta_fw >= 0;
+    
+    %remove the non-zero elements of alpha and beta (central weighting)
+    alpha = alpha_cw.*av;
+    beta = beta_cw.*bv;
+    
+    %get the non-zero elements in forward method that aren't in central
+    af = abs(av-af);
+    bf = abs(bv-bf);    
+    af_v = af*alpha_fw;
+    bf_v = bf*beta_fw;
+    
+    %add non-zero elements from forward into central
+    alpha = alpha + af_v;
+    beta = beta + bf_v;
+    av = av + af;
+    bv = bv + bf;
+    if(sum(av) ~= length(av) && sum(bv) ~= length(bv))
+        %get the non-zero elements in backwards
+        ab = alpha_bw >= 0;
+        bb = beta_bw >= 0;
+
+        %get the non-zero elements in backwards that aren't central+forward
+        ab = abs(av-ab);
+        bb = abs(bv-bb);
+        ab_v = ab*alpha_bw;
+        bb_v = bb*beta_bw;
+    
+        %add non-zero elements from backwards into central+forwards
+        alpha = alpha + ab_v;
+        beta = beta + bb_v;
+    end
+end
+
+if strcmp(method,'implicit')
+    %initializing M matrix
+    diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    for i = 1:steps
+        z = L\optval;
+        optval = U\z;
+    end
+
+elseif strcmp(method,'CN')
+    diag = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([0.5*[0 -dt*beta 0].' diag.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+    Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    for i = 1:steps
+        z = L\(Mmin*optval);
+        optval = U\z;
+    end
+elseif strcmp(method,'CNR')
+    %M setup for two implicit steps
+    diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    for i = 1:2
+        z = L\optval;
+        optval = U\z;
+    end
+    %M setup for remaining C-N steps
+    diag = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([0.5*[0 -dt*beta 0].' diag.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+    Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    for i = 1:steps-2
+        z = L\(Mmin*optval);
+        optval = U\z;
+    end
+else
+    error('please enter a correct time-stepping method');
+end
+
+end
+
+
+[____________________________[HestonNandi.m]____________________________]
+function iv = HestonNandi(r,v,vbar,eta,lambda,S0,K,T)
+%Heston-Nandi Method to calculate European call options
+
+M = 100000;  %monte carlo simulation number
+dt = 1/1000;
+N = T/dt;
+N = floor(N); %useful when T is not integer
+rho = -1;     %rho is -1 for Heston-Nandi
+
+%phi generation
+x1 = randn(M,N);
+x2 = randn(M,N);
+phi1 = x1;
+phi2 = rho*x1 + sqrt(1 - rho^2)*x2;
+
+x = log(S0)*ones(M,1);
+v = v*ones(M,1);
+
+%using monte carlo to determine the initial value of the call option
+%vectorized phi into matrices, x and v as vectors to speed up monte carlo
+for bb = 1:N
+    v = abs(v);
+    x = x + r*dt - (v/2)*dt + sqrt(v*dt).*phi1(:,bb);
+    v = (sqrt(v) + (eta/2)*sqrt(dt)*phi2(:,bb)).^2 - lambda*(v - vbar)*dt - (eta^2/4)*dt;
+end
+
+callval = max(exp(x) - exp(K), 0);
+iv = mean(callval)*exp(-r*T);
+
+end
+
+
+[____________________________[a3q2a.m]____________________________]
+%a3q2a
+lambda = 10;
+vbar = 0.04;
+eta = 1;
+v0 = 0.04;
+r = 0;
+T = 1;
+S0 = 100;
+type = 'call';
+K = linspace(-0.5+log(S0),0.2+log(S0),10);
+z = zeros(10,1);
+
+
+for i = 1:10
+    z(i,1) = HestonNandi(r,v0,vbar,eta,lambda,S0,K(i),T);
+    vols(i,1) = blsimpv(S0, exp(K(i)), r, T,z(i,1));
+end
+figure
+plot(K,z,'-')
+ylabel('Heston-Nandi call option value')
+xlabel('log K')
+title('call option value versus log K')
+
+expK = K;
+for i = 1:10
+    expK(i) = exp(K(i));
+end
+figure
+plot(expK,vols,'-')
+ylabel('volatility')
+xlabel('K')
+title('volatility using MC versus K')
+
+
+[____________________________[a3q2b.m]____________________________]
+%a3q2b.m
+lambda = 10;
+vbar = 0.04;
+eta = 1;
+v0 = 0.04;
+r = 0;
+T = 1;
+S0 = 100;
+lambda_hat = lambda + eta/2;
+vbar_hat = vbar*lambda/lambda_hat;
+method = 'implicit';
+type = 'call';
+delt = T/25;
+bsfd = zeros(10,1);
+K2 = linspace(-0.5+log(S0),0.2+log(S0),10);
+K = zeros(10,1);
+
+for aa = 1:10
+    K(aa) = exp(K2(aa));
+    S = [0:0.1*K(aa):0.4*K(aa),...
+        0.45*K(aa):0.05*K(aa):0.8*K(aa),...
+        0.82*K(aa):0.02*K(aa):0.9*K(aa),...
+        0.91*K(aa):0.01*K(aa):1.1*K(aa),...
+        1.12*K(aa):0.02*K(aa):1.2*K(aa),...
+        1.25*K(aa):.05*K(aa):1.6*K(aa),...
+        1.7*K(aa):0.1*K(aa):2*K(aa),...
+         2.2*K(aa), 2.4*K(aa), 2.8*K(aa),...
+        3.6*K(aa), 5*K(aa), 7.5*K(aa), 10*K(aa)];
+    delt = 0.04;
+    %four refinements from initial grid in problem 1
+    for i = 1:4
+        S = S(2:end);
+        N = T/delt;
+        lenS = length(S);
+        vol = zeros(lenS,N);
+        deetee = delt;
+        %computing a matrix of volatilities; every time t has a vector of
+        %volatilities associated with S. S = 0 is discarded, as is t = 0
+        for j = 1:N
+            e_lhatt = exp(-lambda_hat*deetee);
+            vol(:,j) = max((v0-vbar_hat)*e_lhatt + vbar_hat - eta*log(S/S0)*((1-e_lhatt)/(lambda_hat*deetee)),0);
+            deetee = deetee + delt;
+        end        
+        optval = ifd_lvf(vol, r, T, K(aa), delt, S, method,type);
+        %for sake of comparing option values, we compare the option values
+        %where its underyling is >= 100
+        s_ind = find(S >= 100);
+        bsfd(aa) = optval(s_ind(1));
+        %double the number of grid intervals
+        gridlen = length(S);
+        new_s = zeros(1,2*gridlen-1);
+        for c = 1:(gridlen-1)
+            new_s(2*c-1) = S(c);
+            new_s(2*c) = (S(c) + S(c+1))/2;
+        end
+        new_s(end) = S(end);
+        S = new_s;
+        delt = delt/2;
+    end
+end
+figure
+plot(K2,bsfd,'-');
+title('Call Option versus log K');
+ylabel('Call Option')
+xlabel('log K')
+grid on
+
+voltt = zeros(10,1);
+for zz = 1:10
+    voltt(zz) = blsimpv(S0, exp(K2(zz)), r, T, bsfd(zz));
+end
+
+figure
+plot(exp(K2),voltt,'-');
+title('implied volatility versus K');
+ylabel('implied volatility')
+xlabel('K')
+
+
+[____________________________[ifd_lvf.m]____________________________]
+function optval = ifd_lvf(vol, r, T, K, dt, S, method,type)
+%black-scholes PDE implicit/CN/CN-Rannacher method
+%method: 'implicit', 'CN', 'CNR'
+%type: 'call','put'
+%MODIFIED TO ACCEPT A VOLATILITY MATRIX
+
+steps = T/dt;
+%calculating initial option value
+if strcmp(type,'call')
+    V0 = max(S - K,0).';
+elseif strcmp(type,'put')
+    V0 = max(K - S,0).';
+else
+    error('bad type')
+end
+optval = V0;
+%initializing upstream weighting alpha and beta values
+lenS = length(S);
+a1 = 2;
+a2 = lenS - 1;
+Si = S(a1:a2);           %Si
+Si_min1 = S(1:a2-1);     %Si-1
+Si_pls1 = S(a1+1:lenS);  %Si+1
+
+if strcmp(method,'implicit')
+    for i = 1:steps
+        %use one volatility vector per time step
+        %used to calculate alpha, beta
+        volvect = vol(:,i);
+        volvect = volvect(2:end-1)';
+        alpha_cw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si_pls1 - Si_min1);
+        beta_cw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si_min1);
+
+        alpha_fw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1));
+        beta_fw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si);
+
+        alpha_bw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si - Si_min1);
+        beta_bw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1));
+
+        %get non-zero elements from central
+        av = alpha_cw >= 0;
+        bv = beta_cw >= 0;
+        if sum(av) == length(av) && sum(bv) == length(bv)
+            alpha = alpha_cw;
+            beta = beta_cw;
+        else
+            %get the non zero elements of alpha and beta (forward weighting)
+            af = alpha_fw >= 0;
+            bf = beta_fw >= 0;
+
+            %remove the non-zero elements of alpha and beta (central weighting)
+            alpha = alpha_cw.*av;
+            beta = beta_cw.*bv;
+
+            %get the non-zero elements in forward method that aren't in central
+            af = abs(av-af);
+            bf = abs(bv-bf);    
+            af_v = af*alpha_fw;
+            bf_v = bf*beta_fw;
+
+            %add non-zero elements from forward into central
+            alpha = alpha + af_v;
+            beta = beta + bf_v;
+            av = av + af;
+            bv = bv + bf;
+            if(sum(av) ~= length(av) && sum(bv) ~= length(bv))
+                %get the non-zero elements in backwards
+                ab = alpha_bw >= 0;
+                bb = beta_bw >= 0;
+
+                %get the non-zero elements in backwards that aren't central+forward
+                ab = abs(av-ab);
+                bb = abs(bv-bb);
+                ab_v = ab*alpha_bw;
+                bb_v = bb*beta_bw;
+
+                %add non-zero elements from backwards into central+forwards
+                alpha = alpha + ab_v;
+                beta = beta + bb_v;
+            end
+        end
+        diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+        M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';    
+        optval = M\optval;
+    end
+elseif strcmp(method,'CN')
+    for i = 1:steps
+        %use one volatility vector per time step
+        %used to calculate alpha, beta
+        volvect = vol(:,i);
+        volvect = volvect(2:end-1)';
+        alpha_cw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si_pls1 - Si_min1);
+        beta_cw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si_min1);
+
+        alpha_fw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1));
+        beta_fw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si);
+
+        alpha_bw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si - Si_min1);
+        beta_bw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1));
+
+        %get non-zero elements from central
+        av = alpha_cw >= 0;
+        bv = beta_cw >= 0;
+        if sum(av) == length(av) && sum(bv) == length(bv)
+            alpha = alpha_cw;
+            beta = beta_cw;
+        else
+            %get the non zero elements of alpha and beta (forward weighting)
+            af = alpha_fw >= 0;
+            bf = beta_fw >= 0;
+
+            %remove the non-zero elements of alpha and beta (central weighting)
+            alpha = alpha_cw.*av;
+            beta = beta_cw.*bv;
+
+            %get the non-zero elements in forward method that aren't in central
+            af = abs(av-af);
+            bf = abs(bv-bf);    
+            af_v = af*alpha_fw;
+            bf_v = bf*beta_fw;
+
+            %add non-zero elements from forward into central
+            alpha = alpha + af_v;
+            beta = beta + bf_v;
+            av = av + af;
+            bv = bv + bf;
+            if(sum(av) ~= length(av) && sum(bv) ~= length(bv))
+                %get the non-zero elements in backwards
+                ab = alpha_bw >= 0;
+                bb = beta_bw >= 0;
+
+                %get the non-zero elements in backwards that aren't central+forward
+                ab = abs(av-ab);
+                bb = abs(bv-bb);
+                ab_v = ab*alpha_bw;
+                bb_v = bb*beta_bw;
+
+                %add non-zero elements from backwards into central+forwards
+                alpha = alpha + ab_v;
+                beta = beta + bb_v;
+            end
+        end
+        diag = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+        M = spdiags([0.5*[0 -dt*beta 0].' diag.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+        mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+        Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+        optval = M\(Mmin*optval);
+    end
+elseif strcmp(method,'CNR')
+    for j = 1:steps
+        %use one volatility vector per time step
+        %used to calculate alpha, beta
+        volvect = vol(:,j);
+        volvect = volvect(2:end-1)';
+        alpha_cw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si_pls1 - Si_min1);
+        beta_cw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si_min1);
+
+        alpha_fw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1));
+        beta_fw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si);
+
+        alpha_bw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si - Si_min1);
+        beta_bw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1));
+
+        %get non-zero elements from central
+        av = alpha_cw >= 0;
+        bv = beta_cw >= 0;
+        if sum(av) == length(av) && sum(bv) == length(bv)
+            alpha = alpha_cw;
+            beta = beta_cw;
+        else
+            %get the non zero elements of alpha and beta (forward weighting)
+            af = alpha_fw >= 0;
+            bf = beta_fw >= 0;
+
+            %remove the non-zero elements of alpha and beta (central weighting)
+            alpha = alpha_cw.*av;
+            beta = beta_cw.*bv;
+
+            %get the non-zero elements in forward method that aren't in central
+            af = abs(av-af);
+            bf = abs(bv-bf);    
+            af_v = af*alpha_fw;
+            bf_v = bf*beta_fw;
+
+            %add non-zero elements from forward into central
+            alpha = alpha + af_v;
+            beta = beta + bf_v;
+            av = av + af;
+            bv = bv + bf;
+            if(sum(av) ~= length(av) && sum(bv) ~= length(bv))
+                %get the non-zero elements in backwards
+                ab = alpha_bw >= 0;
+                bb = beta_bw >= 0;
+
+                %get the non-zero elements in backwards that aren't central+forward
+                ab = abs(av-ab);
+                bb = abs(bv-bb);
+                ab_v = ab*alpha_bw;
+                bb_v = bb*beta_bw;
+
+                %add non-zero elements from backwards into central+forwards
+                alpha = alpha + ab_v;
+                beta = beta + bb_v;
+            end
+        end
+        if j <= 2 %implicit time step
+            diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+            M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+            optval = M\optval;          
+        else %Rannacher smoothing
+            diag = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+            M = spdiags([0.5*[0 -dt*beta 0].' diag.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+            mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+            Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+            optval = M\(Mmin*optval);
+        end
+    end
+else
+    error('please enter a correct time-stepping method');
+end
+
+end
+
+
+
+[____________________________[a3q4a.m]____________________________]
+%a3q2b.m
+lambda = 10;
+vbar = 0.04;
+eta = 1;
+v0 = 0.04;
+r = 0;
+T = 1;
+S0 = 100;
+lambda_hat = lambda + eta/2;
+vbar_hat = vbar*lambda/lambda_hat;
+method = 'implicit';
+type = 'call';
+delt = T/25;
+bsfd = zeros(10,1);
+K2 = linspace(-0.5+log(S0),0.2+log(S0),10);
+K = zeros(10,1);
+
+for aa = 1:10
+    K(aa) = exp(K2(aa));
+    S = [0:0.1*K(aa):0.4*K(aa),...
+        0.45*K(aa):0.05*K(aa):0.8*K(aa),...
+        0.82*K(aa):0.02*K(aa):0.9*K(aa),...
+        0.91*K(aa):0.01*K(aa):1.1*K(aa),...
+        1.12*K(aa):0.02*K(aa):1.2*K(aa),...
+        1.25*K(aa):.05*K(aa):1.6*K(aa),...
+        1.7*K(aa):0.1*K(aa):2*K(aa),...
+         2.2*K(aa), 2.4*K(aa), 2.8*K(aa),...
+        3.6*K(aa), 5*K(aa), 7.5*K(aa), 10*K(aa)];
+    delt = 0.04;
+    %four refinements from initial grid in problem 1
+    for i = 1:4
+        S = S(2:end);
+        N = T/delt;
+        lenS = length(S);
+        
+        %computing a vector of volatilities
+        e_lhatt = exp(-lambda_hat);
+        vol = max((v0-vbar_hat)*e_lhatt + vbar_hat - eta*log(S/S0)*((1-e_lhatt)/(lambda_hat)),0);
+      
+        optval = ifd_lvf(vol, r, T, K(aa), delt, S, method,type);
+        %for sake of comparing option values, we compare the option values
+        %where its underyling is >= 100
+        s_ind = find(S >= 100);
+        bsfd(aa) = optval(s_ind(1));
+        
+        %double the number of grid intervals
+        gridlen = length(S);
+        new_s = zeros(1,2*gridlen-1);
+        for c = 1:(gridlen-1)
+            new_s(2*c-1) = S(c);
+            new_s(2*c) = (S(c) + S(c+1))/2;
+        end
+        new_s(end) = S(end);
+        S = new_s;
+        delt = delt/2;
+    end
+end
+
+
+[____________________________[ifdlvf_no_t.m]____________________________]
+function optval = ifdlvf_no_t(volvect, r, T, K, dt, S, method,type)
+%black-scholes PDE implicit/CN/CN-Rannacher method
+%method: 'implicit', 'CN', 'CNR'
+%type: 'call','put'
+%MODIFIED TO ACCEPT A VOLATILITY VECTOR - for A3Q4a
+
+steps = T/dt;
+%calculating initial option value
+if strcmp(type,'call')
+    V0 = max(S - K,0).';
+elseif strcmp(type,'put')
+    V0 = max(K - S,0).';
+else
+    error('bad type')
+end
+optval = V0;
+%initializing upstream weighting alpha and beta values
+lenS = length(S);
+a1 = 2;
+a2 = lenS - 1;
+Si = S(a1:a2);           %Si
+Si_min1 = S(1:a2-1);     %Si-1
+Si_pls1 = S(a1+1:lenS);  %Si+1
+
+%use volatility vector to calculate alpha, beta
+volvect = volvect(2:end-1)';
+alpha_cw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si_pls1 - Si_min1);
+beta_cw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si_min1);
+
+alpha_fw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1));
+beta_fw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1)) + (r*Si)./(Si_pls1 - Si);
+
+alpha_bw = (volvect.*Si.*Si)./((Si - Si_min1).*(Si_pls1 - Si_min1)) - (r*Si)./(Si - Si_min1);
+beta_bw = (volvect.*Si.*Si)./((Si_pls1 - Si).*(Si_pls1 - Si_min1));
+
+%get non-zero elements from central
+av = alpha_cw >= 0;
+bv = beta_cw >= 0;
+if sum(av) == length(av) && sum(bv) == length(bv)
+    alpha = alpha_cw;
+    beta = beta_cw;
+else
+    %get the non zero elements of alpha and beta (forward weighting)
+    af = alpha_fw >= 0;
+    bf = beta_fw >= 0;
+
+    %remove the non-zero elements of alpha and beta (central weighting)
+    alpha = alpha_cw.*av;
+    beta = beta_cw.*bv;
+
+    %get the non-zero elements in forward method that aren't in central
+    af = abs(av-af);
+    bf = abs(bv-bf);    
+    af_v = af*alpha_fw;
+    bf_v = bf*beta_fw;
+
+    %add non-zero elements from forward into central
+    alpha = alpha + af_v;
+    beta = beta + bf_v;
+    av = av + af;
+    bv = bv + bf;
+    if(sum(av) ~= length(av) && sum(bv) ~= length(bv))
+        %get the non-zero elements in backwards
+        ab = alpha_bw >= 0;
+        bb = beta_bw >= 0;
+
+        %get the non-zero elements in backwards that aren't central+forward
+        ab = abs(av-ab);
+        bb = abs(bv-bb);
+        ab_v = ab*alpha_bw;
+        bb_v = bb*beta_bw;
+
+        %add non-zero elements from backwards into central+forwards
+        alpha = alpha + ab_v;
+        beta = beta + bb_v;
+    end
+end
+if strcmp(method,'implicit')
+    diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';    
+    [L,U] = lu(M);
+    for i = 1:steps
+        z = L\optval;
+        optval = U\z;
+    end
+elseif strcmp(method,'CN')
+    diag = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([0.5*[0 -dt*beta 0].' diag.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+    Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    for i = 1:steps
+        z = L\(Mmin*optval);
+        optval = U\z;
+    end
+elseif strcmp(method,'CNR')
+    %for implicit
+    diag = [r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M = spdiags([[0 -dt*beta 0].' diag.' [0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    %for Crank-Nicolson
+    diag_CN = 0.5*[r*dt dt*(alpha + beta + r) 0] + ones(1,lenS);
+    M_CN = spdiags([0.5*[0 -dt*beta 0].' diag_CN.' 0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    mindiag = ones(1,lenS) - 0.5*[r*dt dt*(alpha + beta + r) 0];
+    Mmin = spdiags([-0.5*[0 -dt*beta 0].' mindiag.' -0.5*[0 -dt*alpha 0].'],-1:1,lenS,lenS).';
+    [L,U] = lu(M);
+    [L_CN,U_CN] = lu(M_CN);
+    for j = 1:steps        
+        if j <= 2       %implicit time step
+            z = L\optval;
+            optval = U\z;
+        else            %Rannacher smoothing
+            z = L_CN\(Mmin*optval);
+            optval = U_CN\z;
+        end
+    end
+else
+    error('please enter a correct time-stepping method');
+end
+
+end

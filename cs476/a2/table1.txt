@@ -1,0 +1,8 @@
+table 1:
+sigma		0.40
+r		0.02
+mu		0.1
+time to expiry	1.0 years
+strike		$120
+S0		$100
+payoff		put

@@ -1,0 +1,2 @@
+B-S PDE:
+how does forward difference apply to option pricing

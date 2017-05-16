@@ -1,0 +1,6 @@
+http://www.cs.cornell.edu/info/courses/spring-98/cs522/content/lecture2.math.pdf
+http://www.goddardconsulting.ca/option-pricing-finite-diff-implicit.html
+http://www.goddardconsulting.ca/matlab-finite-diff-implicit.html
+http://www.math.yorku.ca/~hmzhu/Math-6911/lectures/Lecture5/5_BlkSch_FDM.pdf
+
+http://kodu.ut.ee/~rkangro/computational_finance/finmat11/finmat_eng_11.pdf
