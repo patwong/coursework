@@ -1,0 +1,9 @@
+top
+- always has bottom neighbor
+bottom
+- always has top neighbor
+middle
+- always has top/bottom neighbor
+
+
+try squaring edist

@@ -1,0 +1,26 @@
+interpreting the image matrix U
+
+W = weight matrix of a graph, i.e. weight on edges for every node i
+D = degree matrix of a graph, i.e. sum of all the weights on all edges
+
+
+look at adjacent pixels (i.e. on matrix U). then the "laplacian" matrix we're creating, ones directly beside it have wij left and right. above and diagonal are then m*n away
+- make sample matrix and see what above/below/diagonal difference will be
+
+
+
+what row is element (2,3) in? m = 6, n = 6
+- 9
+!!!!!!   	(i-1)*m+j	!!!!!!!!
+- (2-1)*6+3 = 1*6+3=9
+
+element(1,2)
+(1-1)*6+1 = 1
+
+element(6,5)
+
+
+%dumb way = flatten, get index number?
+
+____________________
+getting the j value for W(i,j)

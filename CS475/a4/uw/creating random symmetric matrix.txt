@@ -1,0 +1,5 @@
+%range of 20 multiplied by something
+N = 3;
+d = randi(20,[N,1])
+   t = triu(bsxfun(@min,d,d.').*randi(20,N),1); % The upper trianglar random values
+   M = diag(d)+t+t.'

@@ -1,0 +1,3 @@
+(2,3)
+(i-1)*m+j ORIGINAL - tells you the row
+(i-1)*m+j,(i)*m+j+1

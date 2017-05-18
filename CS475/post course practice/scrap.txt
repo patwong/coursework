@@ -1,0 +1,32 @@
+we start from bottom left, bottom to top, left to right
+
+3	6	9
+2	5	8
+1	4	7
+
+(M,1) = m-th row, 1st column
+-------------------------------------------------------
+
+actual index == row number in W
+
+(j-1)*M + (M-i+1)
+
+(2,2) = (2-1)*3 + (3-2+1) = 3 + 2 = 5
+(1,3) = (3-1)*3 + (3-1+1) = 2*3 + 3 = 9
+
+(3,1) = (1-1)*M + (3 - 3 + 1) = 0 + 1 = 1
+(2,1) = (1-1)*M + (3-2+1) = 2
+(1,1) = (1-1)*3 + (3-1+1) = 3
+
+(3,2) = (2-1)*3 + (3-3+1) = 3+1 = 4
+
+------
+view image as an x,y grid
+(2,2) = (j-1)*M + (M-i+1)
+
+right neighbour
+(current i) + (M-i) - it is M away?
+
+bottom right
+jindex = xindex + 
+(1,2) = (j)*M + (M-i+1) = 2*3 + (3-1+1) = 6 + 3 = 9

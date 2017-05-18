@@ -1,0 +1,8 @@
+neighbour calculation - one function, specify right, left, bottom, top, bottom left, etc.
+cascading if statement like in the sample code, e.g.:
+	if i > 1
+		/stuff
+		if i > 2
+			/stuff
+		end
+	end

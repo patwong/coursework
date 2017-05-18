@@ -1,0 +1,29 @@
+what happens at every iteration?
+- get an x of k length
+- create v
+	v has same amount of non-zero entries as x
+	v is a vector of original A which includes diag and entry below
+		- will this always be the case? YES
+- create v*v'
+	 what do the entries in this matrix look like?
+	columns that share entries with with column k get their entries modified
+
+----------
+every iteration
+get a smaller column
+apply a transformation to all columns
+- this transformation makes all values besides the first element of the subcolumn zero
+what happens to the other columns?
+- this transformation matrix v*v' only has four entries in its four top right elements
+- the next two columns share elements with the first column; so they are affected by the transformation
+- so the subdiagonal below the diagonal gets zeroed out and "shifted" to another upper subdiagonal
+- columns that don't share row elements remain the same
+- end result is a p = 0, q = 2 diagonal matrix
+
+what is Q?
+v is a vector with two non-zero entries, then the matrix formed by v*v'contains only four non-zero entries; a11,a12,a21,a22.then Qi at the i-th iteration is an identity matrix with four potentially non-zero entries, aii, aii+1, ai+1i,ai+1i+1. so the cumulative Q is an upperhessenberg matrix.
+----------
+[q4b] RQ is upper hessenberg - Q is upperhessenberg, r is a q-2 matrix, so result is a upperhessenberg (assuming no cancellation - prove?). 
+
+R: upper triangular matrix, a tridiagonal matrix shifted up
+Q:
